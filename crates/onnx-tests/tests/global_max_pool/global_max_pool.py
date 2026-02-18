@@ -10,7 +10,7 @@
 # used to generate model: global_max_pool.onnx
 
 import onnx
-from onnx import helper, TensorProto
+from onnx import TensorProto, helper
 
 OPSET_VERSION = 22
 
@@ -40,7 +40,7 @@ def main():
     )
 
     onnx.save(model, "global_max_pool.onnx")
-    print(f"Finished exporting model to global_max_pool.onnx")
+    print("Finished exporting model to global_max_pool.onnx")
 
 
 if __name__ == "__main__":

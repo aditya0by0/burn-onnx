@@ -1,6 +1,6 @@
 use super::prelude::*;
 
-impl NodeCodegen for onnx_ir::node::global_avg_pool::GlobalMaxPoolNode {
+impl NodeCodegen for onnx_ir::node::global_max_pool::GlobalMaxPoolNode {
     fn inputs(&self) -> &[Argument] {
         &self.inputs
     }
@@ -21,16 +21,16 @@ impl NodeCodegen for onnx_ir::node::global_avg_pool::GlobalMaxPoolNode {
 
         let (field_type, init_tokens) = match rank {
             3 => (
-                quote! { AdaptiveMaxPool1d },
+                quote! { MaxPool1d },
                 quote! {
-                    let #name = AdaptiveMaxPool1dConfig::new(1)
+                    let #name = MaxPool1dConfig::new(1)
                         .init();
                 },
             ),
             4 => (
-                quote! { AdaptiveMaxPool2d },
+                quote! { MaxPool2d },
                 quote! {
-                    let #name = AdaptiveMaxPool2dConfig::new([1, 1])
+                    let #name = MaxPool2dConfig::new([1, 1])
                         .init();
                 },
             ),
@@ -73,7 +73,7 @@ mod tests {
     use super::super::test_helpers::*;
     use burn::tensor::DType;
     use insta::assert_snapshot;
-    use onnx_ir::node::global_avg_pool::{GlobalMaxPoolNode, GlobalMaxPoolNodeBuilder};
+    use onnx_ir::node::global_max_pool::{GlobalMaxPoolNode, GlobalMaxPoolNodeBuilder};
 
     fn create_global_max_pool_node_3d(name: &str) -> GlobalMaxPoolNode {
         GlobalMaxPoolNodeBuilder::new(name)
