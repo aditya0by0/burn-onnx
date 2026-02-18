@@ -56,12 +56,12 @@ impl NodeCodegen for onnx_ir::node::global_avg_pool::GlobalMaxPoolNode {
 
         match rank {
             3 => {
-                imports.register("burn::nn::pool::AdaptiveMaxPool1d");
-                imports.register("burn::nn::pool::AdaptiveMaxPool1dConfig");
+                imports.register("burn::nn::pool::MaxPool1d");
+                imports.register("burn::nn::pool::MaxPool1dConfig");
             }
             4 => {
-                imports.register("burn::nn::pool::AdaptiveMaxPool2d");
-                imports.register("burn::nn::pool::AdaptiveMaxPool2dConfig");
+                imports.register("burn::nn::pool::MaxPool2d");
+                imports.register("burn::nn::pool::MaxPool2dConfig");
             }
             dim => panic!("Unsupported input dim ({dim}) for GlobalMaxPoolNode"),
         }
