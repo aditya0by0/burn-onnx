@@ -87,7 +87,7 @@ mod tests {
         let processor = GlobalMaxPoolProcessor;
         let prefs = OutputPreferences::new();
 
-        processor.infer_types(&mut node, 16, &prefs).unwrap();
+        processor.infer_types(&mut node, 22, &prefs).unwrap();
 
         // Output should have same type and rank as input
         if let ArgType::Tensor(output_tensor) = &node.outputs[0].ty {
