@@ -52,20 +52,31 @@ impl NodeCodegen for onnx_ir::one_hot::OneHotNode {
             _ => panic!("Expected tensor output"),
         };
 
+        let output_dtype = output_arg.ty.elem_type();
+        let output_dtype_tokens = output_dtype.to_tokens();
+
+        let input_dtype = input_arg.ty.elem_type();
+
         match (input_kind, output_kind) {
             (TensorKind::Int, TensorKind::Int) | (TensorKind::Float, TensorKind::Float) => {
-                quote! {
-                    let #output = #input.one_hot_fill(#num_classes, #on_value, #off_value, #axis);
+                if input_dtype == output_dtype {
+                    quote! {
+                        let #output = #input.one_hot_fill(#num_classes, #on_value, #off_value, #axis);
+                    }
+                } else {
+                    quote! {
+                        let #output = #input.one_hot_fill(#num_classes, #on_value, #off_value, #axis).cast(#output_dtype_tokens);
+                    }
                 }
             }
             (TensorKind::Int, TensorKind::Float) => {
                 quote! {
-                    let #output = #input.one_hot_fill(#num_classes, #on_value, #off_value, #axis).float();
+                    let #output = #input.one_hot_fill(#num_classes, #on_value, #off_value, #axis).float().cast(#output_dtype_tokens);
                 }
             }
             (TensorKind::Float, TensorKind::Int) => {
                 quote! {
-                    let #output = #input.one_hot_fill(#num_classes, #on_value, #off_value, #axis).int();
+                    let #output = #input.one_hot_fill(#num_classes, #on_value, #off_value, #axis).int().cast(#output_dtype_tokens);
                 }
             }
             (TensorKind::Int, TensorKind::Bool) | (TensorKind::Float, TensorKind::Bool) => {
@@ -100,7 +111,10 @@ mod tests {
         let code = codegen_forward_default(&node);
         assert_snapshot!(code, @r"
         pub fn forward(&self, indices: Tensor<B, 1, Int>) -> Tensor<B, 2> {
-            let output = indices.one_hot_fill(10usize, 1f32, 0f32, -1i64).float();
+            let output = indices
+                .one_hot_fill(10usize, 1f32, 0f32, -1i64)
+                .float()
+                .cast(burn::tensor::DType::F32);
             output
         }
         ");
@@ -163,7 +177,10 @@ mod tests {
         let code = codegen_forward_default(&node);
         assert_snapshot!(code, @r"
         pub fn forward(&self, indices: Tensor<B, 1>) -> Tensor<B, 2, Int> {
-            let output = indices.one_hot_fill(5usize, 1f32, 0f32, 0i64).int();
+            let output = indices
+                .one_hot_fill(5usize, 1f32, 0f32, 0i64)
+                .int()
+                .cast(burn::tensor::DType::I32);
             output
         }
         ");
