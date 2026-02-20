@@ -133,6 +133,22 @@ const MODELS: &[ModelInfo] = &[
         blocked: false,
     },
     ModelInfo {
+        id: "smollm",
+        dir: "smollm",
+        name: "SmolLM 135M",
+        env: Some(("SMOLLM_MODEL", "smollm-135m")),
+        download_args: &["--model", "smollm-135m"],
+        blocked: false,
+    },
+    ModelInfo {
+        id: "smollm2",
+        dir: "smollm",
+        name: "SmolLM2 135M",
+        env: Some(("SMOLLM_MODEL", "smollm2-135m")),
+        download_args: &["--model", "smollm2-135m"],
+        blocked: false,
+    },
+    ModelInfo {
         id: "qwen-1.5",
         dir: "qwen",
         name: "Qwen1.5 0.5B",
@@ -240,7 +256,14 @@ fn run_one(
 
 pub fn handle_command(args: ModelCheckArgs) -> anyhow::Result<()> {
     let subcmd = args.command.unwrap_or(ModelCheckSubCommand::All);
-    let features = &args.features;
+    // Auto-enable fusion for GPU backends (metal, wgpu).
+    let features = if ["metal", "wgpu"].iter().any(|b| args.features.contains(b))
+        && !args.features.contains("fusion")
+    {
+        format!("{},fusion", args.features)
+    } else {
+        args.features.clone()
+    };
     let release = !args.debug;
 
     let models: Vec<&ModelInfo> = match &args.model {
@@ -264,7 +287,7 @@ pub fn handle_command(args: ModelCheckArgs) -> anyhow::Result<()> {
     let mut failed: Vec<&str> = Vec::new();
 
     for model in &models {
-        if let Err(e) = run_one(model, &subcmd, features, release) {
+        if let Err(e) = run_one(model, &subcmd, &features, release) {
             error!("\x1B[31;1m{} failed: {}\x1B[0m", model.name, e);
             if args.fail_fast {
                 return Err(e);
