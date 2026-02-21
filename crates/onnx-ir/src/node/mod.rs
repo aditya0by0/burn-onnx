@@ -11,6 +11,7 @@
 #[cfg(test)]
 pub mod test_utils;
 
+pub mod einsum;
 pub mod elementwise;
 pub mod elu;
 
