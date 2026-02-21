@@ -49,6 +49,7 @@ pub mod deform_conv;
 pub mod depth_to_space;
 pub mod div;
 pub mod dropout;
+pub mod einsum;
 pub mod elu;
 pub mod empty_graph;
 pub mod equal;
